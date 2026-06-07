@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: marketlens
+
+resources:
+  - infrastructure/minio.yaml
+  - apps/frontend-deployment.yaml
+  - apps/mcp-server-deployment.yaml
+  - apps/scraping-cronjob.yaml

@@ -1,0 +1,16 @@
+name: Kustomize Lint
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Validate Kustomize
+      run: |
+        kubectl kustomize k8s-manifests/
