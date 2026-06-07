@@ -10,7 +10,7 @@ KFP_NS ?= kubeflow
 KFP_CLUSTER_SCOPED_MANIFEST ?= github.com/kubeflow/pipelines/manifests/kustomize/cluster-scoped-resources?ref=$(KFP_VERSION)
 KFP_PLATFORM_AGNOSTIC_MANIFEST ?= github.com/kubeflow/pipelines/manifests/kustomize/env/platform-agnostic?ref=$(KFP_VERSION)
 
-.PHONY: k8s-start kfp-install kfp-ui k8s-clean k8s-status
+.PHONY: k8s-start kfp-install kfp-ui k8s-clean k8s-status deploy-local
 
 # 1. Démarrage du cluster avec provisionnement de stockage
 k8s-start:
@@ -28,11 +28,16 @@ kfp-install:
 kfp-ui:
 	kubectl -n $(KFP_NS) port-forward svc/ml-pipeline-ui 8080:80
 
-# 4. Nettoyage
+# 4. Déploiement local de l'application
+deploy-local:
+	kubectl apply -k k8s-manifests/
+
+# 5. Nettoyage
 k8s-clean:
 	minikube delete
 
-# 5. Diagnostic rapide
+# 6. Diagnostic rapide
 k8s-status:
 	kubectl get pods -n $(KFP_NS)
+	kubectl get pods -n marketlens
 	kubectl get pvc -n $(KFP_NS)

@@ -1,75 +1,58 @@
-# MarketLens GitOps & Infrastructure
+# MarketLens GitOps
 
-This repository contains the infrastructure-as-code and orchestration manifests for the MarketLens AI Platform. It serves as the single source of truth for the platform's Kubernetes environment.
+![Kubernetes](https://img.shields.io/badge/kubernetes-%23326ce5.svg?logo=kubernetes&logoColor=white)
+![ArgoCD](https://img.shields.io/badge/argocd-%23ef7b4d.svg?logo=argo&logoColor=white)
+![Kustomize](https://img.shields.io/badge/kustomize-%23326ce5.svg?logo=kubernetes&logoColor=white)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 
-## Directory Structure
+Centralized GitOps repository for the MarketLens AI Platform. This repository manages the Kubernetes state for the entire microservices ecosystem, ensuring declarative and reproducible deployments.
 
-- `k8s-manifests/`: Contains Kubernetes YAML manifests and Kustomize configuration.
-  - `infrastructure/`: Base infrastructure like MinIO and Secrets templates.
-  - `apps/`: Application deployments (Frontend, MCP Server, Ingestion).
-  - `kubeflow-fix/`: Specific fixes and configurations for Kubeflow Pipelines.
-- `.github/workflows/`: CI/CD pipelines for manifest validation.
-- `Makefile`: Central automation script for cluster management and KFP deployment.
+## Architecture Overview
 
-## Infrastructure Setup
+The MarketLens AI Platform is composed of four decoupled layers, each residing in its own repository and integrated via this GitOps layer:
 
-### Prerequisites
+1.  **[marketlens-ingestion](https://github.com/MarketLens-AI-Platform/marketlens-ingestion)**: Autonomous A2A scraping agents for Shopify and WooCommerce. Uses Playwright and Pydantic for robust data extraction.
+2.  **[marketlens-llm-mcp](https://github.com/MarketLens-AI-Platform/marketlens-llm-mcp)**: Semantic enrichment pipeline using DeepSeek LLM and LangChain, exposed via a Model Context Protocol (MCP) server.
+3.  **[marketlens-mlops](https://github.com/MarketLens-AI-Platform/marketlens-mlops)**: Scalable MLOps layer using Kubeflow. Features XGBoost classification, K-Means clustering, PCA, and Apriori association rules.
+4.  **[marketlens-frontend](https://github.com/MarketLens-AI-Platform/marketlens-frontend)**: Real-time BI dashboard built with Flask and Plotly, featuring a LangChain-powered conversational AI assistant.
 
-- [Minikube](https://minikube.sigs.k8s.io/docs/start/)
-- [kubectl](https://kubernetes.io/docs/tasks/tools/)
-- [Make](https://www.gnu.org/software/make/)
+## ArgoCD Integration
 
-### Deployment Workflow
+This platform follows a GitOps delivery model using **ArgoCD**. ArgoCD monitors the `k8s-manifests/` directory in this repository and automatically synchronizes the cluster state.
 
-1.  **Start Kubernetes Cluster:**
-    ```bash
-    make k8s-start
-    ```
-    This initializes a Minikube cluster with 4 CPUs and 8GB of RAM.
+### Bootstrap with ArgoCD
 
-2.  **Install Kubeflow Pipelines (KFP):**
-    ```bash
-    make kfp-install
-    ```
-    Deploys KFP v2.5.0 and applies necessary fixes located in `k8s-manifests/kubeflow-fix/`.
+Apply the application manifest to your cluster:
 
-3.  **Deploy MarketLens Stack:**
-    First, create your secrets:
-    ```bash
-    cp k8s-manifests/infrastructure/marketlens-secrets.example.yaml k8s-manifests/infrastructure/marketlens-secrets.yaml
-    # Edit k8s-manifests/infrastructure/marketlens-secrets.yaml with your API keys
-    ```
-    Then apply the kustomization:
-    ```bash
-    kubectl apply -k k8s-manifests/
-    ```
-
-4.  **Access the Dashboards:**
-    - KFP UI: `make kfp-ui` (forwarded to `http://localhost:8080`)
-    - MarketLens Frontend: `kubectl port-forward svc/marketlens-frontend 5000:5000 -n marketlens`
-
-## CI/CD Validation
-
-The repository includes a GitHub Action (`kustomize-lint.yml`) that automatically validates the Kustomize configuration on every push and pull request to `main` or `develop`.
-
-To run validation locally:
 ```bash
-kubectl kustomize k8s-manifests/
+kubectl apply -f argocd-app.yaml
 ```
 
-## Makefile Targets
+This will create the `marketlens-ai-platform` application in the `argocd` namespace, pointing to the `k8s-manifests` path of this repository.
 
-| Target | Description |
-|--------|-------------|
-| `k8s-start` | Starts Minikube and enables storage addons. |
-| `kfp-install` | Installs KFP cluster-scoped and platform-agnostic resources. |
-| `kfp-ui` | Port-forwards the KFP UI for local access. |
-| `k8s-clean` | Deletes the Minikube cluster. |
-| `k8s-status` | Checks the status of pods and PVCs in the `kubeflow` namespace. |
+## Repository Structure
 
-## GitOps Principles
+- `k8s-manifests/`: Base Kubernetes manifests organized by category.
+  - `apps/`: Deployments and Services for frontend, MCP server, and ingestion cronjobs.
+  - `infrastructure/`: Shared resources like MinIO and Secret templates.
+  - `kustomization.yaml`: Kustomize aggregation file.
+- `argocd-app.yaml`: ArgoCD Application definition.
+- `Makefile`: Automation for local cluster setup and deployment.
 
-This repository follows GitOps best practices:
-- All infrastructure state is declared in version-controlled manifests.
-- Automation is driven by the `Makefile` and CI pipelines to ensure environment consistency.
-- Any changes to the cluster should be reflected in the manifests here first.
+## Local Development & Deployment
+
+The included `Makefile` provides targets for local Kubernetes management using Minikube:
+
+- `make k8s-start`: Start Minikube with optimized resources.
+- `make kfp-install`: Install Kubeflow Pipelines via Kustomize.
+- `make deploy-local`: Apply all application manifests to the local cluster.
+- `make k8s-status`: Check the status of pods in both `kubeflow` and `marketlens` namespaces.
+- `make kfp-ui`: Port-forward the Kubeflow UI to `localhost:8080`.
+- `make k8s-clean`: Delete the local Minikube cluster.
+
+## Security
+
+Secrets are managed via `marketlens-secrets`. An example template is provided in `k8s-manifests/infrastructure/marketlens-secrets.example.yaml`. **Never commit actual secrets to this repository.**
+
+---
+**Author:** Yassine Kamouss — FST Tanger, LSI 2, 2025/2026
