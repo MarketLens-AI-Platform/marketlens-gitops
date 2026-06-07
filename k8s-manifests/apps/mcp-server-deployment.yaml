@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: marketlens-llm-mcp
+  namespace: marketlens
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: llm-mcp
+  template:
+    metadata:
+      labels:
+        app: llm-mcp
+    spec:
+      containers:
+      - name: llm-mcp
+        image: ghcr.io/marketlens-ai-platform/marketlens-llm-mcp:latest
+        ports:
+        - containerPort: 8000
+        envFrom:
+        - secretRef:
+            name: marketlens-secrets
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: marketlens-llm-mcp
+  namespace: marketlens
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8000
+    targetPort: 8000
+  selector:
+    app: llm-mcp

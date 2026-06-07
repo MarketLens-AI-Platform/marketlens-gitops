@@ -1,0 +1,18 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: marketlens-ingestion
+  namespace: marketlens
+spec:
+  schedule: "0 */6 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: ingestion
+            image: ghcr.io/marketlens-ai-platform/marketlens-ingestion:latest
+            envFrom:
+            - secretRef:
+                name: marketlens-secrets
+          restartPolicy: OnFailure

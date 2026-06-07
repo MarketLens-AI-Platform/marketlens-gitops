@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: marketlens-frontend
+  namespace: marketlens
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: ghcr.io/marketlens-ai-platform/marketlens-frontend:latest
+        ports:
+        - containerPort: 5000
+        envFrom:
+        - secretRef:
+            name: marketlens-secrets
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: marketlens-frontend
+  namespace: marketlens
+spec:
+  type: ClusterIP
+  ports:
+  - port: 5000
+    targetPort: 5000
+  selector:
+    app: frontend
