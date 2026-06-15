@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: marketlens-kafka
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://charts.bitnami.com/bitnami
+    targetRevision: 23.0.0
+    chart: kafka
+    helm:
+      values: |
+        kraft:
+          enabled: true
+        persistence:
+          enabled: false
+        replicaCount: 1
+        listeners:
+          client:
+            protocol: PLAINTEXT
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: marketlens
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

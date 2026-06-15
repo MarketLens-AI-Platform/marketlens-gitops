@@ -5,6 +5,8 @@ namespace: marketlens
 
 resources:
   - infrastructure/s3-service-account.yaml
+  - infrastructure/kafka.yaml
   - apps/frontend-deployment.yaml
   - apps/mcp-server-deployment.yaml
   - apps/scraping-cronjob.yaml
+  - apps/stream-processor-deployment.yaml
