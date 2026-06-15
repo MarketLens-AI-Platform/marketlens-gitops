@@ -10,3 +10,6 @@ resources:
   - apps/mcp-server-deployment.yaml
   - apps/scraping-cronjob.yaml
   - apps/stream-processor-deployment.yaml
+  - monitoring/prometheus-stack.yaml
+  - monitoring/frontend-servicemonitor.yaml
+  - monitoring/grafana-dashboard-configmap.yaml

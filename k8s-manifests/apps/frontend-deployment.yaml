@@ -18,7 +18,8 @@ spec:
       - name: frontend
         image: ghcr.io/marketlens-ai-platform/marketlens-frontend:latest
         ports:
-        - containerPort: 5000
+        - name: http
+          containerPort: 5000
         envFrom:
         - secretRef:
             name: marketlens-secrets
@@ -31,7 +32,8 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - port: 5000
+  - name: http
+    port: 5000
     targetPort: 5000
   selector:
     app: frontend
