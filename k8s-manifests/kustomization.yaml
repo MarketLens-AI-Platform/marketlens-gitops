@@ -4,7 +4,7 @@ kind: Kustomization
 namespace: marketlens
 
 resources:
-  - infrastructure/minio.yaml
+  - infrastructure/s3-service-account.yaml
   - apps/frontend-deployment.yaml
   - apps/mcp-server-deployment.yaml
   - apps/scraping-cronjob.yaml

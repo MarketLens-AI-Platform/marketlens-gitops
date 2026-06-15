@@ -13,6 +13,7 @@ spec:
       labels:
         app: llm-mcp
     spec:
+      serviceAccountName: marketlens-sa
       containers:
       - name: llm-mcp
         image: ghcr.io/marketlens-ai-platform/marketlens-llm-mcp:latest
